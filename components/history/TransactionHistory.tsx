@@ -1,0 +1,46 @@
+import React from 'react';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { selectHistory, selectTransaction, selectPayment } from '@/store/slices/paymentSlice';
+import TransactionItem from './TransactionItem';
+
+/**
+ * Scrollable list of past transactions
+ */
+const TransactionHistory: React.FC = () => {
+    const dispatch = useAppDispatch();
+    const history = useAppSelector(selectHistory);
+    const { selectedTransaction } = useAppSelector(selectPayment);
+
+    if (history.length === 0) {
+        return (
+            <div className="py-16 px-4 text-center space-y-4">
+                <div className="flex justify-center">
+                    <div className="h-14 w-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
+                        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-900 tracking-tight">No Transactions Yet</p>
+                    <p className="text-xs text-slate-400 font-medium">Your payment history will appear here.</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar scroll-smooth">
+            {history.map((tx) => (
+                <TransactionItem
+                    key={tx.transactionId}
+                    transaction={tx}
+                    onClick={(t) => dispatch(selectTransaction(t))}
+                    isActive={selectedTransaction?.transactionId === tx.transactionId}
+                />
+            ))}
+        </div>
+    );
+};
+
+export default TransactionHistory;
