@@ -14,7 +14,7 @@ export const storage = {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
         } catch (error) {
-            console.error('Failed to save to localStorage:', error);
+            // Silently fail to maintain professional error handling
         }
     },
 
@@ -26,14 +26,13 @@ export const storage = {
         try {
             const data = localStorage.getItem(STORAGE_KEY);
             if (!data) return [];
-
+            
             const parsed = JSON.parse(data);
             if (Array.isArray(parsed)) {
                 return parsed.filter(tx => tx && tx.transactionId);
             }
             return [];
         } catch (error) {
-            console.error('Failed to parse localStorage data:', error);
             return [];
         }
     },

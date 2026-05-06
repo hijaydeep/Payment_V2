@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { PaymentState, Transaction } from '@/types/payment';
+import { PaymentState, Transaction, PaymentStatus } from '@/types/payment';
 import { MAX_RETRIES } from '@/utils/constants';
-import { RootState } from '../index';
 
 const initialState: PaymentState = {
     status: 'IDLE',
@@ -12,27 +11,13 @@ const initialState: PaymentState = {
     loading: false,
 };
 
-/**
- * helper for idempotent history updates
- */
-const updateHistory = (state: PaymentState) => {
-    if (!state.currentTransaction) return;
-
-    const index = state.history.findIndex(
-        t => t.transactionId === state.currentTransaction?.transactionId
-    );
-
-    if (index >= 0) {
-        state.history[index] = { ...state.currentTransaction };
-    } else {
-        state.history.unshift({ ...state.currentTransaction });
-    }
-};
-
 const paymentSlice = createSlice({
     name: 'payment',
     initialState,
     reducers: {
+        hydrateTransactions: (state, action: PayloadAction<Transaction[]>) => {
+            state.history = action.payload;
+        },
         startPayment: (state, action: PayloadAction<Transaction>) => {
             state.status = 'PROCESSING';
             state.currentTransaction = action.payload;
@@ -40,77 +25,81 @@ const paymentSlice = createSlice({
             state.loading = true;
         },
         paymentSuccess: (state, action: PayloadAction<{ transactionId: string }>) => {
-            if (!state.currentTransaction || state.currentTransaction.transactionId !== action.payload.transactionId) return;
-
-            state.status = 'SUCCESS';
-            state.loading = false;
-            state.currentTransaction.status = 'SUCCESS';
-            updateHistory(state);
+            if (state.currentTransaction && state.currentTransaction.transactionId === action.payload.transactionId) {
+                const completedTransaction: Transaction = {
+                    ...state.currentTransaction,
+                    status: 'SUCCESS',
+                    timestamp: Date.now(),
+                };
+                state.status = 'SUCCESS';
+                state.currentTransaction = completedTransaction;
+                state.history = [completedTransaction, ...state.history.filter(tx => tx.transactionId !== action.payload.transactionId)];
+                state.loading = false;
+            }
         },
-        paymentFailed: (state, action: PayloadAction<{ transactionId: string; error: string; failureReason: string }>) => {
-            if (!state.currentTransaction || state.currentTransaction.transactionId !== action.payload.transactionId) return;
-
-            state.status = 'FAILED';
-            state.error = action.payload.error;
-            state.loading = false;
-            state.currentTransaction.status = 'FAILED';
-            state.currentTransaction.failureReason = action.payload.failureReason;
-            updateHistory(state);
+        paymentFailed: (state, action: PayloadAction<{ transactionId: string; error: string; failureReason?: string }>) => {
+            if (state.currentTransaction && state.currentTransaction.transactionId === action.payload.transactionId) {
+                const failedTransaction: Transaction = {
+                    ...state.currentTransaction,
+                    status: 'FAILED',
+                    failureReason: action.payload.failureReason,
+                    timestamp: Date.now(),
+                };
+                state.status = 'FAILED';
+                state.currentTransaction = failedTransaction;
+                state.error = action.payload.error;
+                state.history = [failedTransaction, ...state.history.filter(tx => tx.transactionId !== action.payload.transactionId)];
+                state.loading = false;
+            }
         },
         paymentTimeout: (state, action: PayloadAction<{ transactionId: string }>) => {
-            if (!state.currentTransaction || state.currentTransaction.transactionId !== action.payload.transactionId) return;
-
-            state.status = 'TIMEOUT';
-            state.error = 'The request timed out. Please try again.';
-            state.loading = false;
-            state.currentTransaction.status = 'TIMEOUT';
-            state.currentTransaction.failureReason = 'Gateway Timeout';
-            updateHistory(state);
+            if (state.currentTransaction && state.currentTransaction.transactionId === action.payload.transactionId) {
+                const timeoutTransaction: Transaction = {
+                    ...state.currentTransaction,
+                    status: 'TIMEOUT',
+                    failureReason: 'Gateway Timeout',
+                    timestamp: Date.now(),
+                };
+                state.status = 'TIMEOUT';
+                state.currentTransaction = timeoutTransaction;
+                state.history = [timeoutTransaction, ...state.history.filter(tx => tx.transactionId !== action.payload.transactionId)];
+                state.loading = false;
+            }
         },
         retryPayment: (state) => {
-            if (!state.currentTransaction || state.currentTransaction.retryCount >= MAX_RETRIES) return;
-
-            state.status = 'PROCESSING';
-            state.error = null;
-            state.loading = true;
-            state.currentTransaction.retryCount += 1;
-            state.currentTransaction.status = 'PROCESSING';
+            if (state.currentTransaction && state.currentTransaction.retryCount < MAX_RETRIES) {
+                state.status = 'PROCESSING';
+                state.currentTransaction.retryCount += 1;
+                state.error = null;
+                state.loading = true;
+            }
         },
         selectTransaction: (state, action: PayloadAction<Transaction | null>) => {
             state.selectedTransaction = action.payload;
         },
-        hydrateTransactions: (state, action: PayloadAction<Transaction[]>) => {
-            state.history = [...action.payload].sort((a, b) => b.timestamp - a.timestamp);
-        },
         resetPayment: (state) => {
             state.status = 'IDLE';
             state.currentTransaction = null;
-            state.selectedTransaction = null;
             state.error = null;
             state.loading = false;
         },
-        clearError: (state) => {
-            state.error = null;
-        }
     },
 });
 
-// Selectors
-export const selectPayment = (state: RootState) => state.payment;
-export const selectPaymentStatus = (state: RootState) => state.payment.status;
-export const selectHistory = (state: RootState) => state.payment.history;
-export const selectCurrentTransaction = (state: RootState) => state.payment.currentTransaction;
-
 export const {
+    hydrateTransactions,
     startPayment,
     paymentSuccess,
     paymentFailed,
     paymentTimeout,
     retryPayment,
     selectTransaction,
-    hydrateTransactions,
     resetPayment,
-    clearError
 } = paymentSlice.actions;
+
+export const selectPayment = (state: { payment: PaymentState }) => state.payment;
+export const selectHistory = (state: { payment: PaymentState }) => state.payment.history;
+export const selectCurrentTransaction = (state: { payment: PaymentState }) => state.payment.currentTransaction;
+export const selectPaymentStatus = (state: { payment: PaymentState }) => state.payment.status;
 
 export default paymentSlice.reducer;

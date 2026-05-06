@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { selectHistory, selectTransaction, selectPayment } from '@/store/slices/paymentSlice';
 import TransactionItem from './TransactionItem';
 
 /**
- * Scrollable list of past transactions
+ * Scrollable list of past transactions sorted by newest first.
  */
 const TransactionHistory: React.FC = () => {
     const dispatch = useAppDispatch();
     const history = useAppSelector(selectHistory);
     const { selectedTransaction } = useAppSelector(selectPayment);
+
+    // Ensure newest transactions are always at the top for better UX
+    const sortedHistory = useMemo(() => {
+        return [...history].sort((a, b) => b.timestamp - a.timestamp);
+    }, [history]);
 
     if (history.length === 0) {
         return (
@@ -31,10 +36,10 @@ const TransactionHistory: React.FC = () => {
 
     return (
         <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar scroll-smooth">
-            {history.map((tx) => (
-                <TransactionItem
-                    key={tx.transactionId}
-                    transaction={tx}
+            {sortedHistory.map((tx) => (
+                <TransactionItem 
+                    key={tx.transactionId} 
+                    transaction={tx} 
                     onClick={(t) => dispatch(selectTransaction(t))}
                     isActive={selectedTransaction?.transactionId === tx.transactionId}
                 />

@@ -10,7 +10,7 @@ interface RetryPaymentProps {
 }
 
 /**
- * Presentational component for payment retries
+ * Polished retry control with accurate attempt tracking.
  */
 const RetryPayment: React.FC<RetryPaymentProps> = ({ 
     onRetry, 
@@ -18,8 +18,9 @@ const RetryPayment: React.FC<RetryPaymentProps> = ({
     isProcessing, 
     retryCount 
 }) => {
+    // Correct remaining math: MAX_RETRIES - (already performed retries + current failure)
     const remainingRetries = MAX_RETRIES - retryCount;
-    const nextAttemptNumber = retryCount + 1;
+    const currentRetryAttempt = retryCount + 1;
 
     return (
         <div className="space-y-4 w-full">
@@ -30,13 +31,13 @@ const RetryPayment: React.FC<RetryPaymentProps> = ({
                 disabled={!canRetry || isProcessing}
                 loading={isProcessing}
             >
-                {canRetry ? `Retry (${nextAttemptNumber} / ${MAX_RETRIES})` : 'No retries left'}
+                {canRetry ? `Retry Attempt ${currentRetryAttempt} of ${MAX_RETRIES}` : 'Threshold Reached'}
             </Button>
             
-            <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+            <p className="text-center text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
                 {canRetry 
                     ? `${remainingRetries} ${remainingRetries === 1 ? 'attempt' : 'attempts'} remaining`
-                    : 'Maximum retry attempts reached'
+                    : 'Maximum retry limit exceeded'
                 }
             </p>
         </div>

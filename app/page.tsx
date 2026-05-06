@@ -1,16 +1,32 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { selectHistory, selectPayment, hydrateTransactions } from '@/store/slices/paymentSlice';
+import { usePaymentForm } from '@/hooks/usePaymentForm';
+import { usePayment } from '@/hooks/usePayment';
+import { storage } from '@/utils/storage';
+
 import CardInput from '@/components/payment/CardInput';
 import ExpiryInput from '@/components/payment/ExpiryInput';
 import CVVInput from '@/components/payment/CVVInput';
 import AmountInput from '@/components/payment/AmountInput';
 import SubmitButton from '@/components/payment/SubmitButton';
+import StatusScreen from '@/components/status/StatusScreen';
 import CardPreview from '@/components/preview/CardPreview';
+import TransactionHistory from '@/components/history/TransactionHistory';
+import TransactionDetails from '@/components/history/TransactionDetails';
 import Input from '@/components/ui/Input';
-import { usePaymentForm } from '@/hooks/usePaymentForm';
 
+/**
+ * Final Integrated Payment Gateway Dashboard.
+ */
 export default function PaymentGatewayPage() {
+    const dispatch = useAppDispatch();
+    const history = useAppSelector(selectHistory);
+    const { status, selectedTransaction } = useAppSelector(selectPayment);
+    const { submitPayment } = usePayment();
+
     const {
         formData,
         cardType,
@@ -20,97 +36,143 @@ export default function PaymentGatewayPage() {
         getFieldError
     } = usePaymentForm();
 
+    // 1. Hydration: Sync with localStorage on initial mount
+    useEffect(() => {
+        const persistedHistory = storage.loadTransactions();
+        if (persistedHistory.length > 0) {
+            dispatch(hydrateTransactions(persistedHistory));
+        }
+    }, [dispatch]);
+
+    // 2. Persistence: Auto-save history updates
+    useEffect(() => {
+        storage.saveTransactions(history);
+    }, [history]);
+
+    const handleFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!isFormValid) return;
+
+        // Convert amount from string to number before submitting to the engine
+        await submitPayment({
+            cardNumber: formData.cardNumber,
+            cardHolder: formData.cardHolder,
+            expiryDate: formData.expiryDate,
+            cvv: formData.cvv,
+            amount: parseFloat(formData.amount),
+            currency: formData.currency,
+        });
+    };
+
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
-            <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
-                
-                {/* Left Panel: Visual Summary */}
-                <div className="bg-slate-900 p-8 md:p-12 text-white flex flex-col justify-between relative overflow-hidden order-2 lg:order-1">
-                    <div className="relative z-10">
-                        <header className="mb-12">
-                            <h1 className="text-2xl font-bold tracking-tight text-white">Checkout</h1>
-                            <p className="text-slate-400 text-sm mt-2 font-medium">Payment Simulator v2.0</p>
-                        </header>
-                        <div className="mb-12">
-                            <CardPreview 
-                                cardNumber={formData.cardNumber}
-                                cardHolder={formData.cardHolder}
-                                expiryDate={formData.expiryDate}
-                                cardType={cardType}
-                            />
-                        </div>
-                    </div>
-                    <footer className="relative z-10 flex items-center justify-between text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">
-                        <p>© 2026 Simulator</p>
-                        <p>AES-256 SECURED</p>
-                    </footer>
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full -mr-48 -mt-48 blur-3xl" />
-                </div>
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-500">
+            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                {/* Right Panel: Interactive Form */}
-                <div className="p-8 md:p-12 order-1 lg:order-2">
-                    <div className="max-w-md mx-auto space-y-10">
-                        <div>
-                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight text-left">Payment Details</h2>
-                            <p className="text-slate-400 text-sm mt-2 font-medium text-left">Please enter your transaction information below.</p>
-                        </div>
+                {/* Main Flow Panel */}
+                <main className="lg:col-span-7 bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 overflow-hidden border border-slate-100 min-h-[640px] flex flex-col">
+                    {status === 'IDLE' ? (
+                        <div className="p-8 md:p-14 animate-in fade-in slide-in-from-bottom-6 duration-700">
+                            <div className="max-w-md mx-auto space-y-12">
+                                <header>
+                                    <h2 className="text-4xl font-black text-slate-900 tracking-tight">Checkout</h2>
+                                    <p className="text-slate-400 text-sm mt-3 font-semibold uppercase tracking-widest">Safe & Secured Simulator</p>
+                                </header>
 
-                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                            {/* Card Number (Primary Priority) */}
-                            <CardInput 
-                                value={formData.cardNumber} 
-                                onChange={(val) => handleChange('cardNumber', val)} 
-                                onBlur={() => handleBlur('cardNumber')}
-                                error={getFieldError('cardNumber')}
-                            />
+                                <form className="space-y-7" onSubmit={handleFormSubmit}>
+                                    <CardInput
+                                        value={formData.cardNumber}
+                                        onChange={(val) => handleChange('cardNumber', val)}
+                                        onBlur={() => handleBlur('cardNumber')}
+                                        error={getFieldError('cardNumber')}
+                                    />
 
-                            {/* Expiry + CVV Inline Group */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <ExpiryInput 
-                                    value={formData.expiryDate} 
-                                    onChange={(val) => handleChange('expiryDate', val)} 
-                                    onBlur={() => handleBlur('expiryDate')}
-                                    error={getFieldError('expiryDate')}
-                                />
-                                <CVVInput 
-                                    value={formData.cvv} 
-                                    cardType={cardType} 
-                                    onChange={(val) => handleChange('cvv', val)} 
-                                    onBlur={() => handleBlur('cvv')}
-                                    error={getFieldError('cvv')}
-                                />
+                                    <div className="grid grid-cols-2 gap-7">
+                                        <ExpiryInput
+                                            value={formData.expiryDate}
+                                            onChange={(val) => handleChange('expiryDate', val)}
+                                            onBlur={() => handleBlur('expiryDate')}
+                                            error={getFieldError('expiryDate')}
+                                        />
+                                        <CVVInput
+                                            value={formData.cvv}
+                                            cardType={cardType}
+                                            onChange={(val) => handleChange('cvv', val)}
+                                            onBlur={() => handleBlur('cvv')}
+                                            error={getFieldError('cvv')}
+                                        />
+                                    </div>
+
+                                    <Input
+                                        label="Card Holder"
+                                        id="cardHolder"
+                                        placeholder="E.G. JOHN DOE"
+                                        value={formData.cardHolder}
+                                        onChange={(e) => handleChange('cardHolder', e.target.value)}
+                                        onBlur={() => handleBlur('cardHolder')}
+                                        error={getFieldError('cardHolder')}
+                                        className="uppercase placeholder:opacity-30"
+                                        required
+                                    />
+
+                                    <AmountInput
+                                        value={formData.amount}
+                                        currency={formData.currency}
+                                        onChange={(val) => handleChange('amount', val)}
+                                        onCurrencyChange={(cur) => handleChange('currency', cur)}
+                                        error={getFieldError('amount')}
+                                    />
+
+                                    <div className="pt-4">
+                                        <SubmitButton
+                                            amount={formData.amount}
+                                            currency={formData.currency}
+                                            disabled={!isFormValid}
+                                        />
+                                    </div>
+                                </form>
                             </div>
+                        </div>
+                    ) : (
+                        <div className="p-8 md:p-14 flex-1 flex flex-col items-center justify-center">
+                            <div className="max-w-md w-full">
+                                <StatusScreen />
+                            </div>
+                        </div>
+                    )}
+                </main>
 
-                            {/* Card Holder */}
-                            <Input
-                                label="Card Holder"
-                                id="cardHolder"
-                                placeholder="e.g. John Doe"
-                                value={formData.cardHolder}
-                                onChange={(e) => handleChange('cardHolder', e.target.value)}
-                                onBlur={() => handleBlur('cardHolder')}
-                                error={getFieldError('cardHolder')}
-                                autoComplete="name"
-                                required
-                            />
-
-                            {/* Amount & Currency Integrated Control */}
-                            <AmountInput 
-                                value={formData.amount} 
-                                currency={formData.currency} 
-                                onChange={(val) => handleChange('amount', val)}
-                                onCurrencyChange={(cur) => handleChange('currency', cur)}
-                                error={getFieldError('amount')}
-                            />
-
-                            <SubmitButton 
-                                amount={formData.amount} 
-                                currency={formData.currency} 
-                                disabled={!isFormValid}
-                            />
-                        </form>
+                {/* Sidebar Context Panel: Visual Preview & Historical Context */}
+                <aside className="lg:col-span-5 space-y-8">
+                    {/* Live Card Visualization */}
+                    <div className="bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl shadow-slate-900/30">
+                        <CardPreview
+                            cardNumber={formData.cardNumber}
+                            cardHolder={formData.cardHolder}
+                            expiryDate={formData.expiryDate}
+                            cardType={cardType}
+                        />
                     </div>
-                </div>
+
+                    {/* Historical Activity Monitoring */}
+                    <section className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/40">
+                        <header className="flex justify-between items-center mb-8">
+                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Recent Activity</h3>
+                            <span className="text-[10px] font-black bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full uppercase tracking-widest">
+                                {history.length} Records
+                            </span>
+                        </header>
+                        <TransactionHistory />
+                    </section>
+                </aside>
+
+                {/* Global Detailed Inspection Overlay */}
+                {selectedTransaction && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-500">
+                        <div className="w-full max-w-xl">
+                            <TransactionDetails />
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
