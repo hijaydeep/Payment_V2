@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from '../ui/Button';
 import { SuccessStateProps } from '@/types/common';
+import { CheckCircle2 } from 'lucide-react';
 
 /**
  * successful payment.
@@ -9,9 +10,7 @@ const SuccessState: React.FC<SuccessStateProps> = ({ amount, currency, transacti
     <div className="w-full bg-white rounded-3xl border border-emerald-100 p-8 md:p-10 text-center space-y-8 shadow-xl shadow-emerald-500/5 animate-in zoom-in duration-500">
         <div className="flex justify-center">
             <div className="h-20 w-20 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
-                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
+                <CheckCircle2 className="w-12 h-12 text-emerald-500" />
             </div>
         </div>
         <div className="space-y-2 text-center">

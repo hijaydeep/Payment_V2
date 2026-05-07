@@ -3,6 +3,7 @@ import ErrorMessage from '../ui/ErrorMessage';
 import RetryPayment from '../payment/RetryPayment';
 import Button from '../ui/Button';
 import { FailedStateProps } from '@/types/common';
+import { XCircle } from 'lucide-react';
 
 /**
  * rejected payment.
@@ -11,9 +12,7 @@ const FailedState: React.FC<FailedStateProps> = ({ reason, onRetry, canRetry, is
     <div className="w-full bg-white rounded-3xl border border-rose-100 p-8 md:p-10 text-center space-y-8 shadow-xl shadow-rose-500/5 animate-in zoom-in duration-500">
         <div className="flex justify-center">
             <div className="h-20 w-20 bg-rose-50 rounded-full flex items-center justify-center text-rose-500">
-                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <XCircle className="w-10 h-10 text-rose-500" />
             </div>
         </div>
         <div className="space-y-2 text-center">
@@ -28,8 +27,8 @@ const FailedState: React.FC<FailedStateProps> = ({ reason, onRetry, canRetry, is
                 retryCount={retryCount}
             />
         </div>
-        <Button variant="ghost" size="sm" fullWidth onClick={onBack} className="text-slate-400 hover:text-slate-600 font-bold tracking-widest uppercase text-[10px]">
-            Back to Form
+        <Button variant="ghost" fullWidth onClick={onBack}>
+            Try different card
         </Button>
     </div>
 );

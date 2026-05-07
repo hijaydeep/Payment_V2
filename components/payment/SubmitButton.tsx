@@ -1,15 +1,16 @@
 import React from 'react';
 import Button from '../ui/Button';
+import { CURRENCY_SYMBOLS } from '@/utils/constants';
+import { SubmitButtonProps } from '@/types/common';
 
-interface SubmitButtonProps {
-    loading?: boolean;
-    disabled?: boolean;
-    amount: string;
-    currency: string;
-}
-
-const SubmitButton: React.FC<SubmitButtonProps> = ({ loading, disabled, amount, currency }) => {
-    const label = loading ? 'Processing...' : `Pay ${currency} ${amount || '0.00'}`;
+const SubmitButton: React.FC<SubmitButtonProps> = ({ 
+    loading, 
+    disabled, 
+    amount, 
+    currency 
+}) => {
+    const symbol = CURRENCY_SYMBOLS[currency] || currency;
+    const displayAmount = parseFloat(amount) ? parseFloat(amount).toFixed(2) : '0.00';
 
     return (
         <Button
@@ -18,9 +19,8 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ loading, disabled, amount, 
             fullWidth
             loading={loading}
             disabled={disabled}
-            className="mt-4"
         >
-            {label}
+            Pay {symbol}{displayAmount}
         </Button>
     );
 };

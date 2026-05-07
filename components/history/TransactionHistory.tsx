@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { selectHistory, selectTransaction, selectPayment } from '@/store/slices/paymentSlice';
 import TransactionItem from './TransactionItem';
+import { History } from 'lucide-react';
 
 /**
  * Scrollable list of past transactions sorted by newest first.
@@ -21,9 +22,7 @@ const TransactionHistory: React.FC = () => {
             <div className="py-16 px-4 text-center space-y-4">
                 <div className="flex justify-center">
                     <div className="h-14 w-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
-                        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <History className="w-7 h-7" />
                     </div>
                 </div>
                 <div className="space-y-1">

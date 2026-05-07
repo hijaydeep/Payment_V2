@@ -2,6 +2,7 @@ import React from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { selectPayment, selectTransaction } from '@/store/slices/paymentSlice';
 import Button from '../ui/Button';
+import { X } from 'lucide-react';
 
 /**
  * Premium technical inspection panel for transaction receipts.
@@ -32,9 +33,7 @@ const TransactionDetails: React.FC = () => {
                     aria-label="Close details"
                     className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-slate-900 hover:rotate-90 transition-all duration-300"
                 >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-5 h-5" />
                 </button>
             </header>
 

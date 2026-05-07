@@ -1,60 +1,49 @@
-import React, { forwardRef } from 'react';
-import ErrorMessage from './ErrorMessage';
+import React from 'react';
+import { InputProps } from '@/types/common';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    label: string;
-    error?: string | null;
-    helperText?: string;
-    hideLabel?: boolean;
-}
-
-const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ label, id, error, helperText, required, className = '', hideLabel, ...props }, ref) => {
-        const errorId = error ? `${id}-error` : undefined;
-        const helperId = helperText ? `${id}-helper` : undefined;
-
-        return (
-            <div className={`flex flex-col space-y-1.5 w-full ${className}`}>
-                {!hideLabel && (
-                    <label
-                        htmlFor={id}
-                        className="text-xs font-bold uppercase tracking-wider text-gray-500"
-                    >
-                        {label}
-                        {required && <span className="text-red-400 ml-1" aria-hidden="true">*</span>}
-                    </label>
-                )}
-                
+const Input: React.FC<InputProps> = ({ 
+    label, 
+    error, 
+    helperText, 
+    hideLabel, 
+    id, 
+    className = '', 
+    required,
+    ...props 
+}) => {
+    return (
+        <div className="space-y-2.5">
+            {!hideLabel && (
+                <label 
+                    htmlFor={id} 
+                    className="block text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 ml-1"
+                >
+                    {label} {required && <span className="text-rose-500 opacity-50">*</span>}
+                </label>
+            )}
+            <div className="relative">
                 <input
-                    ref={ref}
                     id={id}
-                    required={required}
+                    className={`w-full bg-slate-50 border-2 ${error ? 'border-rose-100 focus:border-rose-200' : 'border-slate-50 focus:border-indigo-100'} rounded-2xl px-5 py-4 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none transition-all duration-300 text-sm ${className}`}
                     aria-invalid={!!error}
-                    aria-describedby={error ? errorId : helperId}
-                    className={`
-                        w-full px-4 py-3 bg-white border rounded-lg transition-all duration-200
-                        placeholder:text-gray-300 text-gray-900 text-sm
-                        ${error 
-                            ? 'border-red-500 focus:ring-4 focus:ring-red-50' 
-                            : 'border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50'
-                        }
-                        disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed
-                    `}
+                    aria-describedby={error ? `${id}-error` : helperText ? `${id}-helper` : undefined}
                     {...props}
                 />
-
-                {helperText && !error && (
-                    <p id={helperId} className="text-xs text-gray-400">
-                        {helperText}
-                    </p>
-                )}
-
-                {error && <ErrorMessage message={error} id={errorId} className="text-xs" />}
             </div>
-        );
-    }
-);
-
-Input.displayName = 'Input';
+            {error ? (
+                <p 
+                    id={`${id}-error`} 
+                    className="text-[10px] text-rose-500 font-bold uppercase tracking-widest ml-1 animate-in fade-in slide-in-from-top-1"
+                >
+                    {error}
+                </p>
+            ) : helperText ? (
+                <p id={`${id}-helper`} className="text-[10px] text-slate-400 font-medium ml-1">
+                    {helperText}
+                </p>
+            ) : null}
+        </div>
+    );
+};
 
 export default Input;

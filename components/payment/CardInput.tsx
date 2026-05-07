@@ -2,14 +2,8 @@ import React from 'react';
 import Input from '../ui/Input';
 import { formatCardNumber } from '@/utils/formatters';
 import { detectCardType } from '@/utils/cardUtils';
-
-interface CardInputProps {
-    value: string;
-    onChange: (value: string) => void;
-    onBlur?: () => void;
-    error?: string | null;
-    disabled?: boolean;
-}
+import CardBadge from '../preview/CardBadge';
+import { CardInputProps } from '@/types/common';
 
 const CardInput: React.FC<CardInputProps> = ({ value, onChange, onBlur, error, disabled }) => {
     const cardType = detectCardType(value);
@@ -20,7 +14,7 @@ const CardInput: React.FC<CardInputProps> = ({ value, onChange, onBlur, error, d
     };
 
     return (
-        <div className="relative">
+        <div className="relative group">
             <Input
                 label="Card Number"
                 id="cardNumber"
@@ -35,8 +29,8 @@ const CardInput: React.FC<CardInputProps> = ({ value, onChange, onBlur, error, d
                 required
             />
             {cardType && cardType !== 'UNKNOWN' && (
-                <div className="absolute right-3 top-[38px] px-2 py-0.5 bg-gray-100 rounded text-[10px] font-bold text-gray-600 uppercase tracking-wider border border-gray-200">
-                    {cardType}
+                <div className="absolute right-4 top-[51px] -translate-y-1/2 flex items-center h-6 animate-in fade-in zoom-in duration-300 pointer-events-none">
+                    <CardBadge type={cardType} />
                 </div>
             )}
         </div>

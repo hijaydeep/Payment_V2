@@ -14,6 +14,10 @@ const AmountInput: React.FC<AmountInputProps> = ({
 }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let val = e.target.value.replace(/[^0-9.]/g, '');
+
+        // 10 character limit
+        if (val.length > 10) val = val.slice(0, 10);
+
         const parts = val.split('.');
         if (parts.length > 2) val = parts[0] + '.' + parts[1];
         if (parts[1] && parts[1].length > 2) val = parts[0] + '.' + parts[1].slice(0, 2);
@@ -36,6 +40,7 @@ const AmountInput: React.FC<AmountInputProps> = ({
                     onChange={handleChange}
                     disabled={disabled}
                     placeholder="0.00"
+                    maxLength={10}
                     className={`w-full bg-slate-50 border-2 ${error ? 'border-red-100 focus:border-red-200' : 'border-slate-50 focus:border-indigo-100'} rounded-2xl py-4 pl-14 pr-24 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none transition-all duration-300 text-lg`}
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2">

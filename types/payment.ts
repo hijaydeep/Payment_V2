@@ -18,6 +18,21 @@ export interface PaymentPayload {
     currency: CurrencyCode;
 }
 
+export interface PaymentRequestBody {
+    transactionId: string;
+    amount: number;
+    currency: string;
+}
+
+export interface FormState {
+    cardNumber: string;
+    cardHolder: string;
+    expiryDate: string;
+    cvv: string;
+    amount: string;
+    currency: CurrencyCode;
+}
+
 export type PaymentResponse =
     | {
           success: true;

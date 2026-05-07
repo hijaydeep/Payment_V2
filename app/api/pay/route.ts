@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
-
-interface PaymentRequestBody {
-    transactionId: string;
-    amount: number;
-    currency: string;
-}
+import { PaymentRequestBody } from '@/types/payment';
 
 /**
  * Mock Payment API Route
@@ -14,7 +9,7 @@ export async function POST(req: Request) {
     try {
         const body = (await req.json()) as Partial<PaymentRequestBody>;
         const { transactionId, amount, currency } = body;
-
+        
         // Payload Validation: Ensure strict API contract with safe type checking
         if (!transactionId || typeof amount !== 'number' || !currency) {
             return NextResponse.json({
@@ -62,9 +57,9 @@ export async function POST(req: Request) {
 
         // 60% Probability: Transaction Success
         return NextResponse.json({
-            success: true,
+                success: true,
             transactionId,
-            status: 'SUCCESS',
+                status: 'SUCCESS',
             message: `Successfully processed ${currency} ${amount}`
         });
 

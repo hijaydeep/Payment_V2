@@ -1,29 +1,27 @@
 import React from 'react';
 import Input from '../ui/Input';
-import { CardType } from '@/types/payment';
+import { CVVInputProps } from '@/types/common';
 
-interface CVVInputProps {
-    value: string;
-    cardType: CardType;
-    onChange: (value: string) => void;
-    onBlur?: () => void;
-    error?: string | null;
-    disabled?: boolean;
-}
-
-const CVVInput: React.FC<CVVInputProps> = ({ value, cardType, onChange, onBlur, error, disabled }) => {
+const CVVInput: React.FC<CVVInputProps> = ({ 
+    value, 
+    cardType, 
+    onChange, 
+    onBlur, 
+    error, 
+    disabled 
+}) => {
     const maxLength = cardType === 'AMEX' ? 4 : 3;
+    const label = cardType === 'AMEX' ? 'CID' : 'CVV';
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const digits = e.target.value.replace(/\D/g, '').slice(0, maxLength);
-        onChange(digits);
+        const val = e.target.value.replace(/\D/g, '').slice(0, maxLength);
+        onChange(val);
     };
 
     return (
         <Input
-            label="CVV"
+            label={label}
             id="cvv"
-            type="password"
             placeholder={cardType === 'AMEX' ? "0000" : "000"}
             value={value}
             onChange={handleChange}

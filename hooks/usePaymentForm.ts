@@ -1,24 +1,15 @@
 import { useState, useMemo, useCallback } from 'react';
 import { detectCardType } from '@/utils/cardUtils';
 import { validateCardNumber, validateCardHolder, validateExpiry, validateCVV, validateAmount } from '@/utils/validators';
-import { CurrencyCode } from '@/types/payment';
+import { FormState, UsePaymentFormReturn } from '@/types/common';
 import { formatCardNumber } from '@/utils/formatters';
-
-interface FormState {
-    cardNumber: string;
-    cardHolder: string;
-    expiryDate: string;
-    cvv: string;
-    amount: string;
-    currency: CurrencyCode;
-}
 
 type TouchedState = Partial<Record<keyof FormState, boolean>>;
 
 /**
  * Hook to manage payment form state and dependent field updates
  */
-export const usePaymentForm = () => {
+export const usePaymentForm = (): UsePaymentFormReturn => {
     const [formData, setFormData] = useState<FormState>({
         cardNumber: '',
         cardHolder: '',
@@ -47,14 +38,12 @@ export const usePaymentForm = () => {
         setFormData(prev => {
             let normalizedValue = value;
 
-            // Enforce source-of-truth normalization before storing
             if (field === 'cardNumber') {
                 normalizedValue = formatCardNumber(value);
             }
 
             const next = { ...prev, [field]: normalizedValue };
 
-            // Cross-field logic: Sync CVV length with card type
             if (field === 'cardNumber') {
                 const prevType = detectCardType(prev.cardNumber);
                 const nextType = detectCardType(normalizedValue);

@@ -1,14 +1,7 @@
 import React from 'react';
 import Input from '../ui/Input';
+import { ExpiryInputProps } from '@/types/common';
 import { formatExpiry } from '@/utils/formatters';
-
-interface ExpiryInputProps {
-    value: string;
-    onChange: (value: string) => void;
-    onBlur?: () => void;
-    error?: string | null;
-    disabled?: boolean;
-}
 
 const ExpiryInput: React.FC<ExpiryInputProps> = ({ value, onChange, onBlur, error, disabled }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

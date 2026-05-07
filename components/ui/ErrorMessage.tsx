@@ -1,22 +1,17 @@
 import React from 'react';
-
-interface ErrorMessageProps {
-    message: string;
-    id?: string;
-    className?: string;
-}
+import { ErrorMessageProps } from '@/types/common';
+import { AlertCircle } from 'lucide-react';
 
 const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, id, className = '' }) => {
-    if (!message) return null;
-
     return (
-        <p
+        <div 
             id={id}
-            className={`text-sm text-red-600 mt-1 font-medium ${className}`}
-            aria-live="polite"
+            role="alert"
+            className={`flex items-center gap-3 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 animate-in fade-in slide-in-from-top-2 duration-300 ${className}`}
         >
-            {message}
-        </p>
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <p className="text-[11px] font-bold uppercase tracking-wider">{message}</p>
+        </div>
     );
 };
 
