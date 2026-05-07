@@ -2,14 +2,7 @@ import React from 'react';
 import ErrorMessage from '../ui/ErrorMessage';
 import RetryPayment from '../payment/RetryPayment';
 import Button from '../ui/Button';
-
-interface TimeoutStateProps {
-    onRetry: () => void;
-    canRetry: boolean;
-    isProcessing: boolean;
-    retryCount: number;
-    onBack: () => void;
-}
+import { TimeoutStateProps } from '@/types/common';
 
 /**
  * gateway timeout.

@@ -1,14 +1,8 @@
 import React from 'react';
-import { Transaction } from '@/types/payment';
-
-interface TransactionItemProps {
-    transaction: Transaction;
-    onClick: (transaction: Transaction) => void;
-    isActive: boolean;
-}
+import { TransactionItemProps } from '@/types/common';
 
 /**
- * High-density history item with premium interactions.
+ * history item with interactions.
  */
 const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onClick, isActive }) => {
     const date = new Date(transaction.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' });
@@ -25,11 +19,10 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onClick,
     return (
         <button
             onClick={() => onClick(transaction)}
-            className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${
-                isActive 
-                    ? 'border-indigo-600 bg-indigo-50/40 ring-1 ring-indigo-600 shadow-xl shadow-indigo-500/5' 
+            className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${isActive
+                    ? 'border-indigo-600 bg-indigo-50/40 ring-1 ring-indigo-600 shadow-xl shadow-indigo-500/5'
                     : 'border-slate-100 bg-white hover:border-slate-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-200/40'
-            }`}
+                }`}
             aria-pressed={isActive}
         >
             <div className="flex justify-between items-center mb-2.5">
@@ -40,7 +33,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onClick,
                     {transaction.currency} {transaction.amount.toFixed(2)}
                 </p>
             </div>
-            
+
             <div className="flex justify-between items-end">
                 <div className="space-y-1">
                     <p className="text-[10px] font-mono text-slate-400 opacity-60">

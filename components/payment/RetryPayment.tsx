@@ -1,24 +1,17 @@
 import React from 'react';
 import { MAX_RETRIES } from '@/utils/constants';
+import { RetryPaymentProps } from '@/types/common';
 import Button from '../ui/Button';
-
-interface RetryPaymentProps {
-    onRetry: () => void;
-    canRetry: boolean;
-    isProcessing: boolean;
-    retryCount: number;
-}
 
 /**
  * Polished retry control with accurate attempt tracking.
  */
-const RetryPayment: React.FC<RetryPaymentProps> = ({ 
-    onRetry, 
-    canRetry, 
-    isProcessing, 
-    retryCount 
+const RetryPayment: React.FC<RetryPaymentProps> = ({
+    onRetry,
+    canRetry,
+    isProcessing,
+    retryCount
 }) => {
-    // Correct remaining math: MAX_RETRIES - (already performed retries + current failure)
     const remainingRetries = MAX_RETRIES - retryCount;
     const currentRetryAttempt = retryCount + 1;
 
@@ -33,9 +26,9 @@ const RetryPayment: React.FC<RetryPaymentProps> = ({
             >
                 {canRetry ? `Retry Attempt ${currentRetryAttempt} of ${MAX_RETRIES}` : 'Threshold Reached'}
             </Button>
-            
+
             <p className="text-center text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
-                {canRetry 
+                {canRetry
                     ? `${remainingRetries} ${remainingRetries === 1 ? 'attempt' : 'attempts'} remaining`
                     : 'Maximum retry limit exceeded'
                 }

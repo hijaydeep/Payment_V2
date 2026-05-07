@@ -1,12 +1,6 @@
 import React from 'react';
 import Button from '../ui/Button';
-
-interface SuccessStateProps {
-    amount: number;
-    currency: string;
-    transactionId: string;
-    onDone: () => void;
-}
+import { SuccessStateProps } from '@/types/common';
 
 /**
  * successful payment.

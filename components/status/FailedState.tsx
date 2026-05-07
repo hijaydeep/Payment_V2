@@ -2,15 +2,7 @@ import React from 'react';
 import ErrorMessage from '../ui/ErrorMessage';
 import RetryPayment from '../payment/RetryPayment';
 import Button from '../ui/Button';
-
-interface FailedStateProps {
-    reason: string;
-    onRetry: () => void;
-    canRetry: boolean;
-    isProcessing: boolean;
-    retryCount: number;
-    onBack: () => void;
-}
+import { FailedStateProps } from '@/types/common';
 
 /**
  * rejected payment.

@@ -1,13 +1,10 @@
 import React from 'react';
 import Spinner from '../ui/Spinner';
 import Button from '../ui/Button';
-
-interface ProcessingStateProps {
-    onCancel: () => void;
-}
+import { ProcessingStateProps } from '@/types/common';
 
 /**
- * active processing state.
+ * processing state.
  */
 const ProcessingState: React.FC<ProcessingStateProps> = ({ onCancel }) => (
     <div className="text-center space-y-6 py-12 animate-in fade-in duration-500">
